@@ -18,13 +18,13 @@ def get_pdf_text(pdf_path):
     return pages
 
 def get_text_chunks(text):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000,chunk_overlap=1000)
     chunks = text_splitter.split_documents(text)
     return chunks
 
 def get_vector_store(text_chunks):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
-    vector_store = FAISS.from_documents(text_chunks, embedding=embeddings)
+    vector_store = FAISS.from_documents(text_chunks,embedding=embeddings)
     vector_store.save_local("faiss_index")
 
 def get_conversational_chain():
@@ -38,17 +38,15 @@ def get_conversational_chain():
     """
 
     model = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.4, google_api_key=GOOGLE_API_KEY)
-
     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
-
     return chain
 
 def user_input(user_question):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
-    new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-    docs = new_db.similarity_search(user_question)
-    chain = get_conversational_chain()
+    embeddings=GoogleGenerativeAIEmbeddings(model="models/embedding-001",google_api_key=GOOGLE_API_KEY)
+    new_db=FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+    docs=new_db.similarity_search(user_question)
+    chain=get_conversational_chain()
 
     response = chain(
         {"input_documents": docs, "question": user_question},
