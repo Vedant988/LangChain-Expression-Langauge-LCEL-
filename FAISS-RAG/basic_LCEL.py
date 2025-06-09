@@ -56,7 +56,7 @@ def user_input(user_question):
     print(response["output_text"])
 
 if __name__=="__main__":
-    pdf_path=r"D:\github\LangChain-Expression-Langauge--LCEL-\tender_iiitn.pdf"    
+    pdf_path=r"D:\github\LangChain-Expression-Langauge--LCEL-\FAISS-RAG\tender_iiitn.pdf"
     raw_text=get_pdf_text(pdf_path)
     text_chunks=get_text_chunks(raw_text)
     get_vector_store(text_chunks)
