@@ -43,7 +43,7 @@ def react_agent_repl(question):
 
         thought_response=model.generate_content(prompt)
         thought=thought_response.text.strip().split("\n")[0].replace("Thought: ", "")
-        print(f"\n🧠 Thought: {thought}")
+        print(f"\nThought: {thought}")
         print(f"prompT {ptr}: {prompt}")
 
         action_prompt=prompt + f"{thought}\nAction:"
@@ -53,7 +53,7 @@ def react_agent_repl(question):
 
         if action_line.startswith("Finish("):
             final_answer=action_line[len("Finish("):-1]
-            print(f"✅ Final Answer: {final_answer}")
+            print(f"Final Answer: {final_answer}")
             break
 
         match=re.match(r"(\w+)\((.*)\)", action_line.strip())
@@ -66,14 +66,14 @@ def react_agent_repl(question):
             else:
                 result="Unknown tool"
 
-            print(f"📄 Observation: {result}")
+            print(f"Observation: {result}")
             history.append({
                 "thought": thought,
                 "action": action_line,
                 "observation": result
             })
         else:
-            print("⚠️ Invalid action. Ending.")
+            print("Invalid action. Ending...")
             break
 
 react_agent_repl("What is ((7 + 3) * 4 / 4)?")
