@@ -1,27 +1,54 @@
 import os
-os.environ["GOOGLE_API_KEY"] = "AIzaSyDPRuvKv-giXi8eLzTrKb_wJHxnCkzIk6k"
-
+from typing import TypedDict, Optional
 from langgraph.graph import StateGraph, END
-from langchain_core.runnables import RunnableLambda
 import google.generativeai as genai
 
+os.environ["GOOGLE_API_KEY"] = ""
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+model = genai.GenerativeModel('gemini-1.5-flash')
+api_key = os.environ.get("GOOGLE_API_KEY")
+
+if not api_key or "AIza" not in api_key:
+    raise ValueError("Google API Key not found or invalid. Please set the GOOGLE_API_KEY environment variable.")
+
+genai.configure(api_key=api_key)
 model=genai.GenerativeModel('gemini-1.5-flash')
 
-class MyState(dict):
-    pass
 
-def ask_gemini(state):
-    question=state["question"]
-    response=model.generate_content(question)
-    return {"question":question,"answer":response.text}
+class MyState(TypedDict):
+    question:str
+    answer:Optional[str]
 
-graph = StateGraph(MyState)
-graph.add_node("Gemini", RunnableLambda(ask_gemini))
-graph.set_entry_point("Gemini")
-graph.set_finish_point("Gemini")
+def ask_gemini(state: MyState)->dict:
+    question=state.get("question")
+    print(f"Node 'ask_gemini' received question:{question}")
 
-app = graph.compile()
+    try:
+        response=model.generate_content(question)
+        
+        if response.parts:
+            answer=response.parts[0].text
+        elif response.text:
+            answer=response.text
+        else:
+            answer="Could not find text in the response."
+            print(f"Gemini response was empty or blocked. Full response: {response}")
 
-result = app.invoke({"question": "What is LangGraph in LangChain?"})
-print(result)
+    except Exception as e:
+        print(f"Gemini Error: {e}")
+        answer="Failed to generate response due to an error."
+    return{"answer":answer}
+
+
+graph_builder=StateGraph(MyState)
+graph_builder.add_node("Gemini",ask_gemini)
+graph_builder.set_entry_point("Gemini")
+graph_builder.add_edge("Gemini",END)
+app = graph_builder.compile()
+
+if __name__ == "__main__":
+    input_data = {"question":"where is IIIT nagpur located in which part of Nagpur?"}    
+    result = app.invoke(input_data)
+    
+    print("\nFinal Result:")
+    print(result)
