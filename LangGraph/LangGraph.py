@@ -8,9 +8,6 @@ genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 api_key = os.environ.get("GOOGLE_API_KEY")
 
-if not api_key or "AIza" not in api_key:
-    raise ValueError("Google API Key not found or invalid. Please set the GOOGLE_API_KEY environment variable.")
-
 genai.configure(api_key=api_key)
 model=genai.GenerativeModel('gemini-1.5-flash')
 
